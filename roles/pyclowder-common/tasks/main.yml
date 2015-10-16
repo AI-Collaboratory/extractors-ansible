@@ -1,0 +1,19 @@
+---
+  - name: Install Packages
+    apt: pkg={{ item }} state=installed update_cache=no
+    with_items:
+      - python
+      - python-pip
+
+  - name: Git Clone PyClowder
+    become_user: clowder
+    git: repo=https://opensource.ncsa.illinois.edu/stash/scm/cats/pyclowder.git dest=/home/clowder/pyclowder version=master update=yes
+
+  - name: Install PyClowder package
+    become_user: clowder
+    shell: python setup.py install
+    args:
+      chdir: /home/clowder/pyclowder
+
+  - name: Install virtualenv support
+    pip: name=virtualenv

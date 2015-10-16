@@ -1,0 +1,50 @@
+---
+- hosts: extractorsserver
+  sudo: yes
+  vars:
+    docker_extractors:
+      - clowder-ocr
+      - clowder-opencv-closeups
+      - clowder-opencv-eyes
+      - clowder-opencv-faces
+      - clowder-opencv-profiles
+  tasks:
+    - name: Install Packages
+      apt: pkg={{ item }} state=installed update_cache=no
+      with_items:
+        - docker.io
+        - python
+        - python-setuptools
+        - bridge-utils
+
+    - lineinfile: dest=/etc/default/docker line=DOCKER_OPTS="--iptables=false --dns 192.168.0.1"
+
+    - easy_install: name=pip
+    - pip: name=docker-py
+
+    - name: Enable services
+      service: name=docker enabled=yes
+
+    - name: Start Docker
+      service: name=docker state=restarted
+
+    - name: Start NCSA containers 1
+      command: docker run --name={{ item }}-1 --net host -d -e 'RABBITMQ_URI="amqp://{{ rabbitmq_username }}:{{ rabbitmq_password }}@ciber-clowder.ext:5672/%2f?heartbeat_interval=180"' ncsa/{{ item }}
+      with_items: docker_extractors
+      tags:
+        - start
+    - name: Start NCSA containers 2
+      command: docker run --name={{ item }}-2 --net host -d -e 'RABBITMQ_URI="amqp://{{ rabbitmq_username }}:{{ rabbitmq_password }}@ciber-clowder.ext:5672/%2f?heartbeat_interval=180"' ncsa/{{ item }}
+      with_items: docker_extractors
+      tags:
+        - start
+
+    - name: Stop NCSA containers 1
+      command: docker rm -f {{ item }}-1
+      with_items: docker_extractors
+      tags:
+        - stop
+    - command: docker rm -f {{ item }}-2
+      with_items: docker_extractors
+      tags:
+        - stop
