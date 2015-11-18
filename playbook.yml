@@ -29,12 +29,12 @@
       service: name=docker state=restarted
 
     - name: Start NCSA containers 1
-      command: docker run --name={{ item }}-1 --net host -d -e 'RABBITMQ_URI="amqp://{{ rabbitmq_username }}:{{ rabbitmq_password }}@ciber-clowder.ext:5672/%2f?heartbeat_interval=180"' ncsa/{{ item }}
+      command: docker run --name={{ item }}-1 --restart=always --net host -d -e 'RABBITMQ_URI="amqp://{{ rabbitmq_username }}:{{ rabbitmq_password }}@ciber-clowder.ext:5672/%2f?heartbeat_interval=180"' ncsa/{{ item }}
       with_items: docker_extractors
       tags:
         - start
     - name: Start NCSA containers 2
-      command: docker run --name={{ item }}-2 --net host -d -e 'RABBITMQ_URI="amqp://{{ rabbitmq_username }}:{{ rabbitmq_password }}@ciber-clowder.ext:5672/%2f?heartbeat_interval=180"' ncsa/{{ item }}
+      command: docker run --name={{ item }}-2 --restart=always --net host -d -e 'RABBITMQ_URI="amqp://{{ rabbitmq_username }}:{{ rabbitmq_password }}@ciber-clowder.ext:5672/%2f?heartbeat_interval=180"' ncsa/{{ item }}
       with_items: docker_extractors
       tags:
         - start
