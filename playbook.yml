@@ -17,7 +17,7 @@
         - python-setuptools
         - bridge-utils
 
-    - lineinfile: dest=/etc/default/docker line=DOCKER_OPTS="--iptables=false --dns 192.168.0.1"
+#    - lineinfile: dest=/etc/default/docker line=DOCKER_OPTS="--iptables=false --dns 192.168.0.1"
 
     - easy_install: name=pip
     - pip: name=docker-py
@@ -27,6 +27,19 @@
 
     - name: Start Docker
       service: name=docker state=restarted
+
+    - name: Delete NCSA containers 1
+      command: docker rm --force=true {{ item }}-1
+      with_items: docker_extractors
+      ignore_errors: yes
+      tags:
+        - rm
+    - name: Delete NCSA containers 2
+      command: docker rm --force=true {{ item }}-2
+      with_items: docker_extractors
+      ignore_errors: yes
+      tags:
+        - rm
 
     - name: Start NCSA containers 1
       command: docker run --name={{ item }}-1 --restart=always --net host -d -e 'RABBITMQ_URI="amqp://{{ rabbitmq_username }}:{{ rabbitmq_password }}@ciber-clowder.ext:5672/%2f?heartbeat_interval=180"' ncsa/{{ item }}
@@ -38,13 +51,3 @@
       with_items: docker_extractors
       tags:
         - start
-
-    - name: Stop NCSA containers 1
-      command: docker rm -f {{ item }}-1
-      with_items: docker_extractors
-      tags:
-        - stop
-    - command: docker rm -f {{ item }}-2
-      with_items: docker_extractors
-      tags:
-        - stop
