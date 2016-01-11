@@ -17,7 +17,7 @@
         - python-setuptools
         - bridge-utils
 
-#    - lineinfile: dest=/etc/default/docker line=DOCKER_OPTS="--iptables=false --dns 192.168.0.1"
+    - lineinfile: dest=/etc/default/docker line=DOCKER_OPTS="--iptables=false --dns 192.168.0.1"
 
     - easy_install: name=pip
     - pip: name=docker-py
